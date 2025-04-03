@@ -3,7 +3,6 @@ library(dplyr)
 library(ggplot2)
 
 
-
 load("C:/Users/litty/OneDrive - Trinity College Dublin/TCD_PhD/Caroline weekily meeting/2024/12. December/OKEON paper_final r codes_01122024/biodivmonit/Raw data/2022_Species_detections.rda")
 data<-Species_detections %>% select(Date,Period, Vocalisations)
 data$Date<-as.Date(data$Date,format = "%d-%m-%Y")
