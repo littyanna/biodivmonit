@@ -19,5 +19,5 @@ Avg_wind: Mean of the average wind speed across 6 weather stations close to the 
 
 Wind_log_ch: Log difference in 'Avg_wind' between two days. This variable is considered for non homogeneous HMMs with wind speed as covariate.
 
-Precip_z: Z transformation applied to the 'Mean_precip' variable. 
+Precip_z: Z transformation applied to the 'Mean_precip' variable. This is used for non homogeneous HMms with precipitation as covariate.
 
