@@ -127,6 +127,3 @@ comparison_3c
 
 ########################################################################################################
 
-#Out-of sample model selection: MSE calculation in a cross validation framework
-
-
