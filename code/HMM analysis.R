@@ -16,7 +16,7 @@ head(Data_hmm)
 
 set.seed(10)
 #List of initial parameter values
-par3c<- list(Voc = list(mean = c(0,0,0), sd = c(0.3862733, 0.2576610, 0.7226931)))# from 100 simulation
+par3c<- list(Voc = list(mean = c(0,0,0), sd = c(0.3862733, 0.2576610, 0.7226931)))
 #define hidden state process
 hid3c<-MarkovChain$new(data=Data_hmm,n_states = 3)
 #Define the observation process
@@ -126,4 +126,21 @@ comparison_3c$Abs_Diff_Median <- abs(comparison_3c$Observed - comparison_3c$Medi
 comparison_3c
 
 ########################################################################################################
+
+## 3 state mean constraint model with precipitation: 3C_p
+par3c_p <- list(Voc = list(mean = c(0,0,0), sd = c(0.4051870, 0.2268517, 0.7426536)))
+hid3c_p<-MarkovChain$new(data=Data_hmm,n_states = 3,formula = ~Precip_z)
+obs3c_p <- Observation$new(data = Data_hmm,
+                         dists = list(Voc = "norm"),
+                         par = par3c_p,
+                         n_states = 3)
+fixpar3c_p<-list(obs=c("Voc.mean.state1.(Intercept)"=NA,"Voc.mean.state2.(Intercept)"=NA, "Voc.mean.state3.(Intercept)"=NA))
+hmm3c_p<-HMM$new(obs=obs3c_p,hid=hid3c_p,fixpar = fixpar3c_p)
+hmm3c_p$fit(silent=F, itnmax= 20000, control = list("maxit"=20000), method="BFGS")
+hmm3c_p$out()
+hmm3c_p$viterbi()
+
+###########################################################################################################
+
+
 
