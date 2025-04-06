@@ -8,148 +8,125 @@ library(hmmTMB) # R package for fitting hidden markov models
 library(ggplot2)
 
 load("D:/Litty-One drive TCD/OneDrive - Trinity College Dublin/TCD_PhD/OKEON_HMM/biodivmonit/data for HMM analysis/Data_hmm.rda")
-View(Data_hmm)
 
 str(Data_hmm)
 
-
-##To fit a 3- state standard HMM
+head(Data_hmm)
+## 3- state zero mean constraint HMM (3C model)
 
 set.seed(10)
-
-#Provide initial values for mean and standard deviation per state
-par3s <- list(Voc = list(mean = c(-1.1010790, -0.0726868,  0.3844790), sd = c(0.5830050, 0.3905911, 1.3805335)))# Initial values selected from 200 HMM models based on best BIC value
-
+#List of initial parameter values
+par3c<- list(Voc = list(mean = c(0,0,0), sd = c(0.3862733, 0.2576610, 0.7226931)))# from 100 simulation
+#define hidden state process
+hid3c<-MarkovChain$new(data=Data_hmm,n_states = 3)
 #Define the observation process
-obs3s <- Observation$new(data = Data_hmm,
+obs3c <- Observation$new(data = Data_hmm,
                          dists = list(Voc = "norm"),
-                         par = par3s,
+                         par = par3c,
                          n_states = 3)
 
-# Suggest initial parameters
-par3s<-obs3s$suggest_initial()
-obs3s$update_par(par = par3s)
-# The hidden state process is stored as a Markovchain object in hmmTMB. 
-hid3s<-MarkovChain$new(data=Data_hmm,n_states = 3)
-#Mention the observation distribution
-dists<-list(Voc="norm")
+#To constrain the mean of the gaussian distribution in each state to zero
+fixpar3c<-list(obs=c("Voc.mean.state1.(Intercept)"=NA,"Voc.mean.state2.(Intercept)"=NA, "Voc.mean.state3.(Intercept)"=NA))
+#Create HMM object using observation and hidden state components
+hmm3c<-HMM$new(obs=obs3c,hid=hid3c,fixpar = fixpar3c)
+#fitting HMM
+hmm3c$fit(silent=F, itnmax= 10000, control = list("maxit"=10000), method="BFGS")# for CI and SE, both give same BIC
+hmm3c$out() 
 
-#create  observation model object
-obs3s<-Observation$new(data=Data_hmm,n_states = 3,dists = dists,par=par3s)
-hmm3s<-HMM$new(obs=obs3s,hid=hid3s)
-hmm3s$fit(silent=F, itnmax= 10000, control = list("maxit"=10000))
-
-hmm3s$coeff_fe()
-llk3s<-hmm3s$llk()
-llk3s
-# The BIC for 3 state standard HMM
-(BIC_cal3s<--2*llk3s+14*log(66))
-
-#The adjusted BIC for 3 state standard HMM
-(BIC_cal3s_adj<--2*llk3s+14*log(66/(2*pi)))
-
-## 3- state zero mean constraint HMM
-
-set.seed(10)
-#par3b <- list(voc = list(mean = c(0,0,0), sd = c(0.15,0.45,0.6)))#used for small SE and CI
-
-par3b <- list(Voc = list(mean = c(0,0,0), sd = c(0.3862733, 0.2576610, 0.7226931)))# from 100 simulation
-hid3b<-MarkovChain$new(data=Data_hmm,n_states = 3)
-obs3b <- Observation$new(data = Data_hmm,
-                         dists = list(Voc = "norm"),
-                         par = par3b,
-                         n_states = 3)
-
-fixpar3b<-list(obs=c("Voc.mean.state1.(Intercept)"=NA,"Voc.mean.state2.(Intercept)"=NA, "Voc.mean.state3.(Intercept)"=NA))
-
-hmm3b<-HMM$new(obs=obs3b,hid=hid3b,fixpar = fixpar3b)
-#hmm3b$fit(silent=F)
-
-#hmm3b$fit(silent=F, itnmax= 10000, control = list("maxit"=10000))
-hmm3b$fit(silent=F, itnmax= 10000, control = list("maxit"=10000), method="BFGS")# for CI and SE, both give same BIC
-hmm3b$out()
-
-##plot
+####################################################################################################
 
 
-# Add states from hmm3b to the `oke2` dataset
-Data_hmm$State <- factor(hmm3b$states(), levels = c("2", "1", "3"))  # Ensure correct order
+#Plot as in Fig.5a 
+
+#Extract the viterbi-decoded states
+states <- factor(hmm3c$viterbi(), levels = c("2", "1", "3"))
+
+# Step 3: Create new data frame
+Data_hmm$State <- states
 
 # Define state colors
 state_colors <- c("1" = "#FFC107", "2" = "#009E73", "3" = "#FF0000")  # Warning, Normal, Disturbance
 
-# Typhoon legend data
 typhoon_legend <- data.frame(
   Typhoon = factor(c("Trami", "Kong-Rey"), levels = c("Trami", "Kong-Rey")),
   Date = as.Date(c("2018-09-29", "2018-10-05"))
 )
 
-# Plot
-ggplot(oke2, aes(x = Date, y = Voc)) +
-  # Add lines for vocalization changes
+ggplot(Data_hmm, aes(x = Date, y = Voc)) +
   geom_line(color = "black") +
-  # Add vertical lines for typhoons with separate colors
   geom_vline(data = typhoon_legend, aes(xintercept = Date, color = Typhoon),
              linetype = "dashed", size = 0.6, show.legend = FALSE) +
-  # Add points with state colors
   geom_point(aes(color = State), size = 1) +
   
-  # Legend for states
+
   scale_color_manual(
-    name = "States",  # Heading for the States legend
+    name = "States",  
     values = c(state_colors, "Trami" = "#FD8D3C", "Kong-Rey" = "purple"),
     breaks = c("2", "1", "3"),
     labels = c("Normal", "Warning", "Disturbed")
   ) +
-  # Format the x-axis for dates
+
   scale_x_date(
     date_breaks = "5 days",
     date_labels = "%d-%b"
   ) +
-  # Update axis labels
+
   labs(
     x = "Date",
     y = "Log Change in Vocalisations"
   ) +
-  # Minimal theme with adjustments
+
   theme_minimal() +
   theme(
     axis.text.x = element_text(size=7, angle = 45, hjust = 0.8),
     axis.text.y = element_text(size=7, hjust = 0.8),
-    legend.title = element_text(size = 9),  # Add legend title
+    legend.title = element_text(size = 9),
     legend.text = element_text(size = 7),
     axis.title.x = element_text(size=7),
     axis.title.y = element_text(size=7),
     strip.text = element_text(size = 6),
-    panel.border = element_rect(color = "black", fill = NA, size = 0.5),  # Add border
-    axis.line = element_line(color = "black")  # Add axis lines
+    panel.border = element_rect(color = "black", fill = NA, size = 0.5),
+    axis.line = element_line(color = "black") 
   )
+##############################################################################################
+
+#In-sample model selection : 1. Adjusted BIC calculation
+## Adjusted BIC for the model
+BIC_3c_adj=-2*hmm3c$llk()+11*log(66/(2*pi))
+BIC_3c_adj
+
+# In sample-model selection: 2. Absolute error between true and simulated statistics based on posterior predictive checks
+
+set.seed(20)
+gof<-function(Data_hmm){
+  s<-c(quantile(Data_hmm$Voc,seq(0,1,by=0.25)),autocor=cor(Data_hmm$Voc[-1],Data_hmm$Voc[-nrow(Data_hmm)],use = "complete.obs"))
+}
+
+# Run posterior predictive checks
+checks_3c<-hmm3c$check(check_fn = gof, silent = T, nsims = 2000)
+
+# Plot histograms of simulated statistics
+checks_3c$plot
 
 
-## posterior predictive checks
-# Step 1: Extract the observed statistics
-obs_stat <- checks_3b$obs_stat
+# Calculate the median of the simulated statistics for each statistic
+median_simulated_stats <- apply(checks_3c$stats, 1, median)
 
-# Step 2: Extract simulated statistics
-simulated_stats <- checks_3b$stats
+# Derive the observed statistics of the data
+observed_stats <- checks_3c$obs_stat
 
-# Step 3: Compute deviations (absolute difference) for all simulations
-deviations <- abs(simulated_stats - obs_stat)
+# Compare observed statistics with median of the simulated statistics
+comparison_3c <- data.frame(
+  Observed = observed_stats, 
+  Median_Simulated = median_simulated_stats
+)
 
-# Step 4: Calculate the mean absolute error for each simulation
-(abs1_2a <- round(rowMeans(deviations), 4))
-# Step 1: Compute squared deviations
-squared_deviations <- (simulated_stats - obs_stat)^2
+# Calculate the absolute difference between observed and median simulated statistics
+comparison_3c$Abs_Diff_Median <- abs(comparison_3c$Observed - comparison_3c$Median_Simulated)
+comparison_3c
 
-# Step 2: Compute MSE for each statistic
-(mse <- round(rowMeans(squared_deviations),4))
+########################################################################################################
 
-# second approch. mean of statistics across simulations and take absolute deviation from original.(Implimented first)
-# Step 1: Compute the mean of each statistic across simulations
-mean_simulated_stats <- rowMeans(simulated_stats)
-
-# Step 2: Compute absolute deviation from the observed statistic
-(abs2 <- round(abs(mean_simulated_stats - obs_stat), 4))
-
+#Out-of sample model selection: MSE calculation in a cross validation framework
 
 
