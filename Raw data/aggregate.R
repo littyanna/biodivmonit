@@ -1,7 +1,7 @@
+#This is the code used to aggregate the data across species and site in a daily resolution. 
 rm(list=ls())
 library(dplyr)
 library(ggplot2)
-
 
 load("D:/Litty-One drive TCD/OneDrive - Trinity College Dublin/TCD_PhD/OKEON_HMM/biodivmonit/Raw data/2022_Species_detections.rda")
 data<-Species_detections %>% select(Date,Period, Vocalisations)
