@@ -1,7 +1,5 @@
 ##Here is the R code for the final models
 
-##Three state mean constraint model
-
 rm(list=ls())
 library(dplyr)
 library(hmmTMB) # R package for fitting hidden markov models
