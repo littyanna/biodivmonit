@@ -1,4 +1,4 @@
-##Here is the R code for the final models
+## Here is the R code for the final models
 
 rm(list=ls())
 library(dplyr)
@@ -10,12 +10,12 @@ load("D:/Litty-One drive TCD/OneDrive - Trinity College Dublin/TCD_PhD/OKEON_HMM
 str(Data_hmm)
 
 head(Data_hmm)
-## 3- state zero mean constraint HMM (3C model)
+## 3- state zero mean constrained HMM (3C model)
 
 set.seed(10)
-#List of initial parameter values
+#List of best initial parameter values
 par3c<- list(Voc = list(mean = c(0,0,0), sd = c(0.3862733, 0.2576610, 0.7226931)))
-#define hidden state process
+#Define the hidden state process
 hid3c<-MarkovChain$new(data=Data_hmm,n_states = 3)
 #Define the observation process
 obs3c <- Observation$new(data = Data_hmm,
@@ -28,7 +28,7 @@ fixpar3c<-list(obs=c("Voc.mean.state1.(Intercept)"=NA,"Voc.mean.state2.(Intercep
 #Create HMM object using observation and hidden state components
 hmm3c<-HMM$new(obs=obs3c,hid=hid3c,fixpar = fixpar3c)
 #fitting HMM
-hmm3c$fit(silent=F, itnmax= 10000, control = list("maxit"=10000), method="BFGS")# for CI and SE, both give same BIC
+hmm3c$fit(silent=F, itnmax= 10000, control = list("maxit"=10000), method="BFGS")
 hmm3c$out() 
 
 ####################################################################################################
@@ -39,7 +39,6 @@ hmm3c$out()
 #Extract the viterbi-decoded states
 states <- factor(hmm3c$viterbi(), levels = c("2", "1", "3"))
 
-# Step 3: Create new data frame
 Data_hmm$State <- states
 
 # Define state colors
@@ -107,7 +106,7 @@ checks_3c<-hmm3c$check(check_fn = gof, silent = T, nsims = 2000)
 checks_3c$plot
 
 
-# Calculate the median of the simulated statistics for each statistic
+# Calculate the median of each simulated statistic
 median_simulated_stats <- apply(checks_3c$stats, 1, median)
 
 # Derive the observed statistics of the data
@@ -127,6 +126,7 @@ comparison_3c
 
 ## 3 state mean constraint model with precipitation: 3C_p
 par3c_p <- list(Voc = list(mean = c(0,0,0), sd = c(0.4051870, 0.2268517, 0.7426536)))
+#Incorporate scaled mean precipitation to the transition probability matrix
 hid3c_p<-MarkovChain$new(data=Data_hmm,n_states = 3,formula = ~Precip_z)
 obs3c_p <- Observation$new(data = Data_hmm,
                          dists = list(Voc = "norm"),
