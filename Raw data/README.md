@@ -1,7 +1,16 @@
 
-Data structure:
-
 _2022_Species_detections.rda_
+
+This raw dataset consists of the individual detections of three bird species in a half hourly resolution from 30/08/2018 to 04/11/2028 in 24 OKEON monitoring sites. 
+
+This data is also available at: https://doi.org/10.5281/zenodo.8133339, which is published as part of the work carried out in:
+
+Ross, S. R. J., Friedman, N. R., Dudley, K. L., Yoshida, T., Yoshimura, M., Economo, E. P., ... & Donohue, I. (2024). Divergent ecological responses to typhoon disturbance revealed via landscape‐scale acoustic monitoring. Global Change Biology, 30(1), e17067.
+
+
+
+Data structure of _2022_Species_detections.rda_
+
 
 Species_detections (dataframe of individual species detection events)
 
