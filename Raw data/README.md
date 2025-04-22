@@ -8,10 +8,7 @@ Ross, S. R. J., Friedman, N. R., Dudley, K. L., Yoshida, T., Yoshimura, M., Econ
 
 
 
-Data structure of _2022_Species_detections.rda_
-
-
-Species_detections (dataframe of individual species detection events)
+Data structure of _2022_Species_detections.rda_: Dataframe of individual species detection events
 
 Filename: Name of the file in which the detection occurs (format SITENAME_YYYYMMDD_hhmmss.wav). 
 
