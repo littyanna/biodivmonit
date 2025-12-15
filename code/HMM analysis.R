@@ -5,7 +5,7 @@ library(dplyr)
 library(hmmTMB) # R package for fitting hidden markov models
 library(ggplot2)
 
-load("D:/Litty-One drive TCD/OneDrive - Trinity College Dublin/TCD_PhD/OKEON_HMM/biodivmonit/data for HMM analysis/Data_hmm.rda")
+load("D:/OKEON_HMM/biodivmonit/data for HMM analysis/Data_hmm.rda")
 
 str(Data_hmm)
 
