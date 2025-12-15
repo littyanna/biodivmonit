@@ -13,7 +13,7 @@ head(Data_hmm)
 ## 3- state zero mean constrained HMM (3C model)
 
 set.seed(10)
-#List of best initial parameter values
+#List of best initial parameter values identified after fitting the model with a large number of times with diffrent set of initial values
 par3c<- list(Voc = list(mean = c(0,0,0), sd = c(0.3862733, 0.2576610, 0.7226931)))
 #Define the hidden state process
 hid3c<-MarkovChain$new(data=Data_hmm,n_states = 3)
